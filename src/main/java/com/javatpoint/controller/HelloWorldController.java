@@ -1,12 +1,22 @@
 package com.javatpoint.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 @RestController
 public class HelloWorldController 
 {
-@RequestMapping("/")
+
+@RequestMapping("/hello")
 public String hello() 
 {
-return "Hello javaTpoint";
+return "Hello cards-cms";
 }
+
+
+@RequestMapping("/health")
+public String healthCheck() 
+{
+return "Your application is up and running";
+}
+
 }
