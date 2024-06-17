@@ -25,11 +25,6 @@ jobs:
       - run: mvn test
       - store_test_results:
           path: target/surefire-reports
-      - slack:
-          channel: $SLACK_CHANNEL
-          message: "Build failed during tests: $CIRCLE_JOB"
-          color: danger
-          notify_on: fail
 
   static_code_analysis:
     executor: docker-executor
@@ -38,10 +33,6 @@ jobs:
       - run:
           name: Run SonarQube Analysis
           command: mvn sonar:sonar -Dsonar.host.url=$SONARQUBE_URL -Dsonar.login=$SONARQUBE_CREDENTIALS
-      - slack:
-          channel: $SLACK_CHANNEL
-          message: "SonarQube analysis completed: ${SONARQUBE_URL}/dashboard?id=${SONARQUBE_PROJECT_KEY}"
-          color: good
       - run:
           name: Wait for Quality Gate
           command: |
@@ -49,12 +40,6 @@ jobs:
             if [ "$STATUS" != "OK" ]; then
               echo "Pipeline aborted due to quality gate failure: $STATUS"
               exit 1
-            fi
-      - slack:
-          channel: $SLACK_CHANNEL
-          message: "SonarQube analysis failed"
-          color: danger
-          notify_on: fail
 
   build_docker_image:
     docker:
@@ -76,12 +61,6 @@ jobs:
             if [ $? -ne 0 ]; then
               echo "Vulnerability scan failed for image: $REGISTRY/$IMAGE_NAME:$CIRCLE_BUILD_NUM"
               exit 1
-            fi
-      - slack:
-          channel: $SLACK_CHANNEL
-          message: "Vulnerability scan failed for image: $REGISTRY/$IMAGE_NAME:$CIRCLE_BUILD_NUM"
-          color: danger
-          notify_on: fail
 
   push_to_ecr:
     docker:
@@ -94,11 +73,6 @@ jobs:
           command: |
             echo $DOCKER_PASSWORD | docker login $REGISTRY -u $DOCKER_USERNAME --password-stdin
             docker push $REGISTRY/$IMAGE_NAME:$CIRCLE_BUILD_NUM
-      - slack:
-          channel: $SLACK_CHANNEL
-          message: "Failed to push Docker image to ECR: $REGISTRY/$IMAGE_NAME:$CIRCLE_BUILD_NUM"
-          color: danger
-          notify_on: fail
 
   update_argocd_image:
     docker:
@@ -111,11 +85,6 @@ jobs:
             argocd login your-argocd-server --username $ARGOCD_USERNAME --password $ARGOCD_PASSWORD --insecure
             argocd app set your-app-name -p image=$REGISTRY/$IMAGE_NAME:$CIRCLE_BUILD_NUM
             argocd app sync your-app-name
-      - slack:
-          channel: $SLACK_CHANNEL
-          message: "Argo CD deployment failed for app: your-app-name with image: $REGISTRY/$IMAGE_NAME:$CIRCLE_BUILD_NUM"
-          color: danger
-          notify_on: fail
 
   integration_tests:
     docker:
@@ -130,7 +99,6 @@ jobs:
           command: |
             argocd login your-argocd-server --username $ARGOCD_USERNAME --password $ARGOCD_PASSWORD --insecure
             argocd app rollback your-app-name
-   
 
 workflows:
   version: 2
@@ -142,4 +110,6 @@ workflows:
       - static_code_analysis
       - build_docker_image
       - vulnerability_scan
-      
+      - push_to_ecr
+      - update_argocd_image
+      - integration_tests
