@@ -2,6 +2,6 @@
 .project
 .settings/
 .vscode/
-target/
+/target/
 
 
