@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequestMapping("/cards")
 public class CardController 
 {
 
@@ -33,9 +34,9 @@ return "Your application is up and running";
 
     // Initialize sample static data
     public CardController() {
-        cardMap.put(1L, new Card(1L, "Card 1", "Description of Card 1"));
-        cardMap.put(2L, new Card(2L, "Card 2", "Description of Card 2"));
-        cardMap.put(3L, new Card(3L, "Card 3", "Description of Card 3"));
+        cardMap.put(1L, new Card(1L, "DebitCard", "Description of DebitCard"));
+        cardMap.put(2L, new Card(2L, "CreditCard", "Description of CreditCard"));
+        cardMap.put(3L, new Card(3L, "DiningCard", "Description of DiningCard"));
     }
 
     @GetMapping("/getAllCardsDetails")
@@ -52,4 +53,6 @@ return "Your application is up and running";
     
 
 }
+
+
 
