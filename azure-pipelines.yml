@@ -2,7 +2,7 @@ trigger:
 - main
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'windows-latest'
 
 steps:
 - checkout: self
@@ -19,3 +19,4 @@ steps:
 - script: |
     docker build -t your-image-name:$(Build.BuildId) .
   displayName: 'Build Docker image'
+  shell: powershell
