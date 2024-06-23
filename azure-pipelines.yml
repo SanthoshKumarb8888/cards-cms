@@ -12,14 +12,10 @@ steps:
     mavenPomFile: 'pom.xml'
     options: '-Dmaven.test.skip=true'
     goals: 'clean install'
-    publishJUnitResults: false
     javaHomeOption: 'JDKVersion'
     jdkVersionOption: '1.8'
     mavenVersionOption: 'Default'
 
-- task: Docker@2
-  inputs:
-    command: 'build'
-    Dockerfile: 'Dockerfile'
-    buildContext: '.'
-    tags: 'your-image-name:$(Build.BuildId)'
+- script: |
+    docker build -t your-image-name:$(Build.BuildId) .
+  displayName: 'Build Docker image'
