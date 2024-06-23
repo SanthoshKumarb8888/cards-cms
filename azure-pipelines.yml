@@ -1,19 +1,35 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
 - main
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: 'ubuntu-latest'
+
+variables:
+  MAVEN_OPTS: "-Xmx1024m"
+  JAVA_HOME: '/usr/lib/jvm/java-8-openjdk-amd64'
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- task: UseJava@1
+  inputs:
+    versionSpec: '1.8'
+    jdkArchitectureOption: 'x64'
+    jdkSourceOption: 'PreInstalled'
+    jdkFile: 'default'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- task: Maven@3
+  inputs:
+    mavenPomFile: 'pom.xml'
+    options: '-Dmaven.test.skip=true'
+    goals: 'clean install'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    mavenVersionOption: 'Default'
+    mavenAuthenticateFeed: false
+
+- task: Docker@2
+  inputs:
+    command: 'build'
+    Dockerfile: 'Dockerfile'
+    buildContext: '.'
+    tags: 'your-image-name:$(Build.BuildId)'
+
