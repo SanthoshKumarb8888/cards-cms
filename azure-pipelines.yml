@@ -4,27 +4,18 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-variables:
-  MAVEN_OPTS: "-Xmx1024m"
-  JAVA_HOME: '/usr/lib/jvm/java-8-openjdk-amd64'
-
 steps:
-- task: UseJava@1
-  inputs:
-    versionSpec: '1.8'
-    jdkArchitectureOption: 'x64'
-    jdkSourceOption: 'PreInstalled'
-    jdkFile: 'default'
+- checkout: self
 
 - task: Maven@3
   inputs:
     mavenPomFile: 'pom.xml'
     options: '-Dmaven.test.skip=true'
     goals: 'clean install'
+    publishJUnitResults: false
     javaHomeOption: 'JDKVersion'
     jdkVersionOption: '1.8'
     mavenVersionOption: 'Default'
-    mavenAuthenticateFeed: false
 
 - task: Docker@2
   inputs:
@@ -32,4 +23,3 @@ steps:
     Dockerfile: 'Dockerfile'
     buildContext: '.'
     tags: 'your-image-name:$(Build.BuildId)'
-
